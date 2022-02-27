@@ -1,0 +1,4 @@
+--insert into Customer (id, id_type, id_number, name) values (1, 'NEWNRIC', '910203-01-8899', 'John');
+--insert into Customer (id, id_type, id_number, name) values (2, 'NEWNRIC', '920505-02-3344', 'David');
+--insert into Customer (id, id_type, id_number, name) values (3, 'PASSPORT', 'A24098888', 'Adam');
+--insert into Customer (id, id_type, id_number, name) values (4, 'PASSPORT', 'A24097777', 'Jenn');
