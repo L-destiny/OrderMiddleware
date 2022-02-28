@@ -1,10 +1,9 @@
 package com.gt.order.middleware.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +42,7 @@ public class OrderServiceImpl implements OrderService {
 		//Save transaction to database
 		Transaction trxRecord = new Transaction();
 		trxRecord.setTrxRefId(orderRequest.getCustomer().getId());
-		//Status & status desc should be in pair
+		//Status & status description should be in pair
 		trxRecord.setStatus(OrderMiddlewareConstant.TRX_STATUS_SUBMITTED);
 		trxRecord.setStatusDesc(OrderMiddlewareConstant.TRX_STATUS_DESC_SUBMITTED);
 		trxRecord.setCreated(LocalDateTime.now());
@@ -52,15 +51,21 @@ public class OrderServiceImpl implements OrderService {
 		
 		Transaction trx = transactionRepo.save(trxRecord);
 
-		//call external service submitOrder
-		//ResponseEntity<String> orders = exOrderServiceImpl.submitOrders(orderRequest.getCustomer().getId(), customer.getOrders());
-		//if response OK then save IN PROGRESS
+		//Call external service submitOrder
+		ResponseEntity<String> orders = exOrderServiceImpl.submitOrders(orderRequest.getCustomer().getId(), customer.getOrders());
+		
+		//Update order status to In Progress for success client submitOrder API call
+		if (HttpStatus.OK.equals(orders.getStatusCode())) {
+			trx.setStatus(OrderMiddlewareConstant.TRX_STATUS_INPROGRESS);
+			trx.setStatusDesc(OrderMiddlewareConstant.TRX_STATUS_DESC_INPROGRESS);
+			updateOrderStatus(trx);
+		}
+
 		return trx;
 	}
 	
 	@Override
 	public Customer searchOrder(Customer customer) {
-		System.out.println("customer.getId()="+customer.getId());
 		return (Customer) customerRepo.findById(customer.getId()).orElseThrow(
 				() -> new ResourceNotFoundException("Order", "Customer ID", customer.getId()));
 	}
@@ -71,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
 		Transaction existingTrx = transactionRepo.findById(trxId).orElseThrow(
 				() -> new ResourceNotFoundException("Transaction", "Id", trxId));
 		
-		//When update status, should update status desc together
+		//When update status, should update status description together
 		existingTrx.setStatus(trx.getStatus());
 		existingTrx.setRemarks(trx.getRemarks());
 		return transactionRepo.save(existingTrx);

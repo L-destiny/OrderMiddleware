@@ -1,8 +1,7 @@
 package com.gt.order.middleware.service.impl;
 
-import java.util.List;
+import java.util.LinkedHashMap;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,9 +18,9 @@ public class CustomerServiceImpl implements CustomerService {
 		this.exCustomerServiceImpl = exCustomerServiceImpl;
 	}
 
-	//Call back end API to retrieve customer
-	public List<ResponseEntity<String>> retrieveUser(String idType, String idNumber) throws JsonMappingException, JsonProcessingException {
-		List<ResponseEntity<String>> customer = exCustomerServiceImpl.getCustomer(idType, idNumber);
+	//Call client getCustomer API to retrieve customer
+	public LinkedHashMap<String, String> retrieveUser(String idType, String idNumber) throws JsonMappingException, JsonProcessingException {
+		LinkedHashMap<String, String> customer = exCustomerServiceImpl.getCustomer(idType, idNumber);
 		return customer;
 	}
 }
